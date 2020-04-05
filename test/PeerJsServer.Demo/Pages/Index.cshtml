@@ -5,41 +5,39 @@
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
+    <h1 class="display-4">Welcome <span id="myId"></span></h1>
 </div>
 
 <div class="container">
     <div class="row">&nbsp;</div>
     <div class="row">
-        <video id="video" playsinline autoplay></video>
-    </div>
-    <div class="row">&nbsp;</div>
-</div>
-
-<div class="container">
-    <div class="row">&nbsp;</div>
-    <div class="row">
-        <div class="col-2">User</div>
-        <div class="col-4"><input type="text" id="userInput" /></div>
-    </div>
-    <div class="row">
-        <div class="col-2">Message</div>
-        <div class="col-4"><input type="text" id="messageInput" /></div>
-    </div>
-    <div class="row">&nbsp;</div>
-    <div class="row">
-        <div class="col-6">
-            <input type="button" id="sendButton" value="Send Message" />
+        <div class="col-xs-6 col-md-3">
+            <video id="myVideo" playsinline autoplay style="max-width: 100%;"></video>
+        </div>
+        <div class="col-xs-6 col-md-9">
+            <video id="peerVideo" playsinline autoplay style="max-width: 100%;"></video>
         </div>
     </div>
+    <div class="row">&nbsp;</div>
+</div>
+
+<div class="container">
+    <form>
+        <div class="form-group row">
+            <div class="col-sm-12">
+                <input type="text" class="form-control" id="peerInput" placeholder="Enter peer's Id here"/>
+            </div>
+        </div>
+        <button class="btn btn-success" id="callButton">
+            Call
+        </button>
+        <button class="btn btn-warning" id="hangupButton">
+            Hang Up
+        </button>
+    </form>
 </div>
 <div class="row">
     <div class="col-12">
-        <hr />
-    </div>
-</div>
-<div class="row">
-    <div class="col-6">
-        <ul id="messagesList"></ul>
+    &nbsp;
     </div>
 </div>

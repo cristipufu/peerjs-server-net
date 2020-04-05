@@ -23,7 +23,9 @@ namespace PeerJsServer
 
         public async Task Invoke(HttpContext context)
         {
-            if (context.Request.Path != "/peerjs")
+            var path = context.Request.Path.ToString();
+
+            if (!path.Contains("/peerjs"))
             {
                 await _next.Invoke(context);
 
@@ -32,7 +34,7 @@ namespace PeerJsServer
 
             if (!context.WebSockets.IsWebSocketRequest)
             {
-                context.Response.StatusCode = 400;
+                context.Response.StatusCode = 200;
 
                 return;
             }

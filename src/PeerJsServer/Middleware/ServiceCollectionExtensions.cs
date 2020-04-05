@@ -6,7 +6,7 @@ namespace PeerJsServer
     {
         public static void AddPeerJsServer(this IServiceCollection services)
         {
-            services.AddSingleton<IWebSocketServer, WebSocketServer>()
+            services.AddSingleton<IWebSocketServer, WebSocketServer>();
         }
     }
 }
