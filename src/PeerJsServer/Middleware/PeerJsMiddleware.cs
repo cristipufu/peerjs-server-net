@@ -75,6 +75,10 @@ namespace PeerJsServer
 
                 await CloseConnectionAsync(socket, ex.Message);
             }
+            finally
+            {
+                socket.Dispose();
+            }
         }
 
         private async Task CloseConnectionAsync(WebSocket socket, string description)
