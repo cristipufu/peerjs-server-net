@@ -41,30 +41,48 @@ namespace PeerJsServer
         private async Task ListenAsync(IClient client, CancellationToken cancellationToken = default)
         {
             var socket = client.GetSocket();
+
             var buffer = new ArraySegment<byte>(new byte[1024 * 16]);
-            var result = await socket.ReceiveAsync(buffer, cancellationToken);
 
-            while (!result.CloseStatus.HasValue)
+            WebSocketReceiveResult result;
+
+            do
             {
-                using var ms = new MemoryStream();
+                var (readResult, message) = await ReadAsync(socket, buffer, cancellationToken);
 
-                ms.Write(buffer.Array, buffer.Offset, result.Count);
+                await HandleMessageAsync(client, message, cancellationToken);
 
-                ms.Seek(0, SeekOrigin.Begin);
-
-                if (result.MessageType == WebSocketMessageType.Text)
-                {
-                    using var reader = new StreamReader(ms, Encoding.UTF8);
-
-                    var text = reader.ReadToEnd();
-
-                    await HandleMessageAsync(client, text, cancellationToken);
-                }
-
-                result = await socket.ReceiveAsync(buffer, cancellationToken);
+                result = readResult;
             }
+            while (!result.CloseStatus.HasValue);
 
             await socket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, cancellationToken);
+        }
+
+        private async Task<(WebSocketReceiveResult, string)> ReadAsync(WebSocket socket, ArraySegment<byte> buffer, CancellationToken cancellationToken = default)
+        {
+            WebSocketReceiveResult result;
+
+            using var ms = new MemoryStream();
+
+            do
+            {
+                result = await socket.ReceiveAsync(buffer, cancellationToken);
+
+                ms.Write(buffer.Array, buffer.Offset, result.Count);
+            }
+            while (!result.EndOfMessage);
+
+            ms.Seek(0, SeekOrigin.Begin);
+
+            if (result.MessageType == WebSocketMessageType.Text)
+            {
+                using var reader = new StreamReader(ms, Encoding.UTF8);
+
+                return (result, reader.ReadToEnd());
+            }
+
+            return (result, string.Empty);
         }
 
         private async Task HandleMessageAsync(IClient client, string text, CancellationToken cancellationToken = default)

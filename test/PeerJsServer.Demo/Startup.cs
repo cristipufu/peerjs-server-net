@@ -19,13 +19,12 @@ namespace PeerJsServer.Demo
         {
             services.AddRazorPages();
 
-            // Register PeerJs Server
+            // register PeerJs Server dependencies
             services.AddPeerJsServer();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -48,7 +47,7 @@ namespace PeerJsServer.Demo
                 endpoints.MapRazorPages();
             });
 
-            // Enable PeerJs Server
+            // enable PeerJs Server middleware
             app.UsePeerJsServer();
         }
     }

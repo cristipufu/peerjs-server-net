@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using PeerJsServer;
 using System;
 
-namespace PeerJsServer
+namespace Microsoft.AspNetCore.Builder
 {
     public static class MiddlewareExtensions
     {

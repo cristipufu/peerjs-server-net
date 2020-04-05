@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using PeerJsServer;
 
-namespace PeerJsServer
+namespace Microsoft.AspNetCore.Builder
 {
     public static class ServiceCollectionExtensions
     {
