@@ -10,7 +10,7 @@ namespace PeerJsServer
 {
     public interface IWebSocketServer
     {
-        Task RegisterClientAsync(IClient client, CancellationToken cancellationToken = default);
+        Task RegisterClientAsync(IClient client, TaskCompletionSource<object> requestCompletedTcs, CancellationToken cancellationToken = default);
     }
 
     public class WebSocketServer : IWebSocketServer
@@ -24,7 +24,7 @@ namespace PeerJsServer
             _messageHandler = new MessageHandler(_realm);
         }
 
-        public async Task RegisterClientAsync(IClient client, CancellationToken cancellationToken = default)
+        public async Task RegisterClientAsync(IClient client, TaskCompletionSource<object> requestCompletedTcs, CancellationToken cancellationToken = default)
         {
             _realm.SetClient(client);
 
@@ -34,6 +34,8 @@ namespace PeerJsServer
             }, cancellationToken);
 
             await ListenAsync(client, cancellationToken);
+
+            requestCompletedTcs.TrySetResult(null);
         }
 
         private async Task ListenAsync(IClient client, CancellationToken cancellationToken = default)
@@ -63,8 +65,6 @@ namespace PeerJsServer
             }
 
             await socket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, cancellationToken);
-
-            //tcs.TrySetResult(null);
         }
 
         private async Task HandleMessageAsync(IClient client, string text, CancellationToken cancellationToken = default)

@@ -48,14 +48,14 @@ namespace PeerJsServer
             try
             {
                 var socket = await context.WebSockets.AcceptWebSocketAsync();
-                var socketFinishedTcs = new TaskCompletionSource<object>();
+                var requestCompletedTcs = new TaskCompletionSource<object>();
 
                 var client = new Client(id, token);
                 client.SetSocket(socket);
 
-                await _webSocketServer.RegisterClientAsync(client);
+                await _webSocketServer.RegisterClientAsync(client, requestCompletedTcs, context.RequestAborted);
 
-                await socketFinishedTcs.Task;
+                await requestCompletedTcs.Task;
             }
             catch (Exception ex)
             {
