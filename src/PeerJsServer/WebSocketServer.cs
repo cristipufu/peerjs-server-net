@@ -35,6 +35,9 @@ namespace PeerJsServer
 
             await ListenAsync(client, cancellationToken);
 
+            // clean-up after socket close
+            _realm.RemoveClientById(client.GetId());
+
             requestCompletedTcs.TrySetResult(null);
         }
 

@@ -15,5 +15,17 @@ namespace PeerJsServer
 
         [JsonProperty("payload")]
         public dynamic Payload { get; set; }
+
+        public static Message Error(string error)
+        {
+            return new Message
+            {
+                Type = MessageType.Error,
+                Payload = new
+                {
+                    msg = error,
+                }
+            };
+        }
     }
 }

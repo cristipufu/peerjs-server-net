@@ -15,8 +15,6 @@ namespace PeerJsServer
 
         WebSocket GetSocket();
 
-        void SetSocket(WebSocket socket);
-
         DateTime GetLastHeartbeat();
 
         void SetLastHeartbeat(DateTime reportingTime);
@@ -26,36 +24,31 @@ namespace PeerJsServer
 
     public class Client : IClient
     {
-        private readonly string _id;
-        private readonly string _token;
-        private WebSocket _socket;
+        private readonly WebSocket _socket;
+        private readonly ClientCredentials _credentials;
+
         private DateTime _reportingTime;
 
-        public Client(string id, string token)
+        public Client(ClientCredentials credentials, WebSocket socket)
         {
-            _id = id;
-            _token = token;
+            _credentials = credentials;
+            _socket = socket;
             _reportingTime = DateTime.UtcNow;
         }
 
         public string GetId()
         {
-            return _id;
+            return _credentials.ClientId;
         }
 
         public string GetToken()
         {
-            return _token;
+            return _credentials.Token;
         }
 
         public WebSocket GetSocket()
         {
             return _socket;
-        }
-
-        public void SetSocket(WebSocket socket)
-        {
-            _socket = socket;
         }
 
         public DateTime GetLastHeartbeat()

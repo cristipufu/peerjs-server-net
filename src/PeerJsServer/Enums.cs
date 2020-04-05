@@ -1,5 +1,13 @@
 ﻿namespace PeerJsServer
 {
+    public static class Errors
+    {
+        public const string InvalidKey = "Invalid key provided";
+        public const string InvalidToken = "Invalid token provided";
+        public const string InvalidWsParameters = "No id, token, or key supplied to websocket server";
+        public const string ConnectionLimitExceeded = "Server has reached its concurrent user limit";
+    }
+
     public static class MessageType
     {
         public const string Heartbeat = "HEARTBEAT";
