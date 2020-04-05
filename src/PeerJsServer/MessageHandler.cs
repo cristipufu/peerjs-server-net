@@ -7,7 +7,7 @@ namespace PeerJsServer
 {
     public interface IMessageHandler
     {
-        Task HandleAsync(IClient client, Message message);
+        Task HandleAsync(IClient client, Message message, CancellationToken cancellationToken = default);
     }
 
     public class MessageHandler : IMessageHandler
@@ -19,27 +19,27 @@ namespace PeerJsServer
             _realm = realm;
         }
 
-        public Task HandleAsync(IClient client, Message message)
+        public Task HandleAsync(IClient client, Message message, CancellationToken cancellationToken = default)
         {
             return message.Type switch
             {
-                MessageType.Open => AcceptAsync(client),
+                MessageType.Open => AcceptAsync(client, cancellationToken),
                 MessageType.Heartbeat => HeartbeatAsync(client),
-                MessageType.Offer => TransferAsync(client, message),
-                MessageType.Answer => TransferAsync(client, message),
-                MessageType.Candidate => TransferAsync(client, message),
-                MessageType.Expire => TransferAsync(client, message),
-                MessageType.Leave => LeaveAsync(client, message),
+                MessageType.Offer => TransferAsync(client, message, cancellationToken),
+                MessageType.Answer => TransferAsync(client, message, cancellationToken),
+                MessageType.Candidate => TransferAsync(client, message, cancellationToken),
+                MessageType.Expire => TransferAsync(client, message, cancellationToken),
+                MessageType.Leave => LeaveAsync(client, message, cancellationToken),
                 _ => throw new NotImplementedException(),
             };
         }
 
-        private Task AcceptAsync(IClient client)
+        private Task AcceptAsync(IClient client, CancellationToken cancellationToken = default)
         {
             return client.SendAsync(new Message
             {
                 Type = MessageType.Open,
-            });
+            }, cancellationToken);
         }
 
         private Task HeartbeatAsync(IClient client)

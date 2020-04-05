@@ -40,7 +40,7 @@ namespace PeerJsServer
         {
             var socket = client.GetSocket();
             var buffer = new ArraySegment<byte>(new byte[1024 * 16]);
-            var result = await socket.ReceiveAsync(buffer, CancellationToken.None);
+            var result = await socket.ReceiveAsync(buffer, cancellationToken);
 
             while (!result.CloseStatus.HasValue)
             {
@@ -56,18 +56,18 @@ namespace PeerJsServer
 
                     var text = reader.ReadToEnd();
 
-                    await HandleMessageAsync(client, text);
+                    await HandleMessageAsync(client, text, cancellationToken);
                 }
 
-                result = await socket.ReceiveAsync(buffer, CancellationToken.None);
+                result = await socket.ReceiveAsync(buffer, cancellationToken);
             }
 
-            await socket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, CancellationToken.None);
+            await socket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, cancellationToken);
 
             //tcs.TrySetResult(null);
         }
 
-        private async Task HandleMessageAsync(IClient client, string text)
+        private async Task HandleMessageAsync(IClient client, string text, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrEmpty(text))
             {
@@ -76,7 +76,7 @@ namespace PeerJsServer
 
             var message = JsonConvert.DeserializeObject<Message>(text);
 
-            await _messageHandler.HandleAsync(client, message);
+            await _messageHandler.HandleAsync(client, message, cancellationToken);
         }
     }
 }
