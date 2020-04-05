@@ -34,7 +34,7 @@ However, we can read more about the library usage on the [official website](http
 
 Add the PeerJS client library to your webpage:
 ```html
-<script src="https://cdn.jsdelivr.net/npm/peerjs@0.3.20/dist/peer.min.js"></script>
+<script src="https://unpkg.com/peerjs@1.0.0/dist/peerjs.min.js"></script>
 ```
 
 Create the Peer object:
