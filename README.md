@@ -4,7 +4,7 @@ ASP.NET Core Server for the [PeerJS library](https://peerjs.com/) which simplifi
 
 To broker connections, PeerJS connects to a PeerServer. Note that no peer-to-peer data goes through the server; The server acts only as a connection broker.
 
-This an ASP.NET Core port of the [Node.js implementation](https://github.com/peers/peerjs-server).
+This is an ASP.NET Core port of the [Node.js implementation](https://github.com/peers/peerjs-server).
 
 ## Server setup
 
