@@ -28,9 +28,9 @@ namespace PeerJsServer
         {
             if (!credentials.Valid)
             {
-                await SendMessageAsync(socket, Message.Error(Errors.InvalidWsParameters), cancellationToken);
+                await socket.SendMessageAsync(Message.Error(Errors.InvalidWsParameters), cancellationToken);
 
-                await CloseSocketAsync(socket, Errors.InvalidWsParameters);
+                await socket.CloseAsync(Errors.InvalidWsParameters);
 
                 requestCompletedTcs.TrySetResult(null);
 
@@ -43,9 +43,9 @@ namespace PeerJsServer
             {
                 if (credentials.Token != client.GetToken())
                 {
-                    await SendMessageAsync(socket, Message.Create(MessageType.IdTaken, "Id is already used!"));
+                    await socket.SendMessageAsync(Message.Create(MessageType.IdTaken, "Id is already used!"));
 
-                    await CloseSocketAsync(socket, Errors.InvalidToken);
+                    await socket.CloseAsync(Errors.InvalidToken);
 
                     requestCompletedTcs.TrySetResult(null);
 
@@ -78,23 +78,6 @@ namespace PeerJsServer
             _realm.RemoveClientById(client.GetId());
 
             requestCompletedTcs.TrySetResult(null);
-        }
-
-        public static Task SendMessageAsync(WebSocket socket, Message msg, CancellationToken cancellationToken = default)
-        {
-            var value = new ArraySegment<byte>(GetSerializedMessage(msg));
-
-            return socket.SendAsync(value, WebSocketMessageType.Text, true, cancellationToken);
-        }
-
-        public static Task CloseSocketAsync(WebSocket socket, string description)
-        {
-            if (socket == null)
-            {
-                return Task.CompletedTask;
-            }
-
-            return socket.CloseAsync(WebSocketCloseStatus.Empty, description, CancellationToken.None);
         }
 
         private async Task AwaitReceiveAsync(IClient client, CancellationToken cancellationToken = default)
@@ -154,18 +137,6 @@ namespace PeerJsServer
             var message = JsonConvert.DeserializeObject<Message>(text);
 
             await _messageHandler.HandleAsync(client, message, cancellationToken);
-        }
-
-        private static byte[] GetSerializedMessage(Message msg)
-        {
-            var serialized = JsonConvert.SerializeObject(msg,
-                Formatting.None,
-                new JsonSerializerSettings
-                {
-                    NullValueHandling = NullValueHandling.Ignore,
-                });
-
-            return Encoding.UTF8.GetBytes(serialized);
         }
     }
 }

@@ -73,7 +73,7 @@ namespace PeerJsServer
                 throw new Exception("Invalid client socket!");
             }
 
-            return WebSocketServer.SendMessageAsync(_socket, msg, cancellationToken);
+            return _socket.SendMessageAsync(msg, cancellationToken);
         }
     }
 }

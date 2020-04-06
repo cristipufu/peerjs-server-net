@@ -35,6 +35,7 @@ namespace PeerJsServer
 
             if (!context.WebSockets.IsWebSocketRequest)
             {
+                // TODO API: handle xhr requests
                 context.Response.StatusCode = 200;
 
                 return;
@@ -58,7 +59,7 @@ namespace PeerJsServer
             {
                 _logger.LogError(ex, ex.Message);
 
-                await WebSocketServer.CloseSocketAsync(socket, ex.Message);
+                await socket.CloseAsync(ex.Message);
             }
             finally
             {
