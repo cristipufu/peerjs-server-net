@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Logging;
 using System;
 using System.Net.WebSockets;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace PeerJsServer
@@ -49,23 +48,9 @@ namespace PeerJsServer
 
                 socket = await context.WebSockets.AcceptWebSocketAsync();
 
-                var queryString = context.Request.Query;
+                var credentials = GetCredentials(context.Request.Query);
 
-                var credentials = new ClientCredentials(
-                    clientId: GetQueryStringValue(queryString, "id"),
-                    token: GetQueryStringValue(queryString, "token"),
-                    key: GetQueryStringValue(queryString, "key"));
-
-                var client = new Client(credentials, socket);
-
-                if (!credentials.Valid)
-                {
-                    await client.SendAsync(Message.Error(Errors.InvalidWsParameters));
-
-                    await CloseConnectionAsync(socket, Errors.InvalidWsParameters);
-                }
-
-                await _webSocketServer.RegisterClientAsync(client, requestCompletedTcs, context.RequestAborted);
+                await _webSocketServer.RegisterClientAsync(credentials, socket, requestCompletedTcs, context.RequestAborted);
 
                 await requestCompletedTcs.Task;
             }
@@ -73,20 +58,20 @@ namespace PeerJsServer
             {
                 _logger.LogError(ex, ex.Message);
 
-                await CloseConnectionAsync(socket, ex.Message);
+                await WebSocketServer.CloseSocketAsync(socket, ex.Message);
             }
             finally
             {
-                socket.Dispose();
+                socket?.Dispose();
             }
         }
 
-        private async Task CloseConnectionAsync(WebSocket socket, string description)
+        private static IClientCredentals GetCredentials(IQueryCollection queryString)
         {
-            if (socket != null)
-            {
-                await socket.CloseAsync(WebSocketCloseStatus.Empty, description, CancellationToken.None);
-            }
+            return new ClientCredentials(
+                clientId: GetQueryStringValue(queryString, "id"),
+                token: GetQueryStringValue(queryString, "token"),
+                key: GetQueryStringValue(queryString, "key"));
         }
 
         private static string GetQueryStringValue(IQueryCollection queryString, string key)

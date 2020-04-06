@@ -1,7 +1,5 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Net.WebSockets;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,6 +13,8 @@ namespace PeerJsServer
 
         WebSocket GetSocket();
 
+        void SetSocket(WebSocket socket);
+
         DateTime GetLastHeartbeat();
 
         void SetLastHeartbeat(DateTime reportingTime);
@@ -24,12 +24,12 @@ namespace PeerJsServer
 
     public class Client : IClient
     {
-        private readonly WebSocket _socket;
-        private readonly ClientCredentials _credentials;
+        private readonly IClientCredentals _credentials;
 
+        private WebSocket _socket;
         private DateTime _reportingTime;
 
-        public Client(ClientCredentials credentials, WebSocket socket)
+        public Client(IClientCredentals credentials, WebSocket socket)
         {
             _credentials = credentials;
             _socket = socket;
@@ -51,6 +51,11 @@ namespace PeerJsServer
             return _socket;
         }
 
+        public void SetSocket(WebSocket socket)
+        {
+            _socket = socket;
+        }
+
         public DateTime GetLastHeartbeat()
         {
             return _reportingTime;
@@ -61,28 +66,14 @@ namespace PeerJsServer
             _reportingTime = reportingTime;
         }
 
-        public async Task SendAsync(Message msg, CancellationToken cancellationToken = default)
+        public Task SendAsync(Message msg, CancellationToken cancellationToken = default)
         {
             if (_socket == null)
             {
                 throw new Exception("Invalid client socket!");
             }
 
-            var value = new ArraySegment<byte>(GetSerializedMessage(msg));
-
-            await _socket.SendAsync(value, WebSocketMessageType.Text, true, cancellationToken);
-        }
-
-        private byte[] GetSerializedMessage(Message msg)
-        {
-            var serialized = JsonConvert.SerializeObject(msg,
-                Formatting.None,
-                new JsonSerializerSettings
-                {
-                    NullValueHandling = NullValueHandling.Ignore,
-                });
-
-            return Encoding.UTF8.GetBytes(serialized);
+            return WebSocketServer.SendMessageAsync(_socket, msg, cancellationToken);
         }
     }
 }

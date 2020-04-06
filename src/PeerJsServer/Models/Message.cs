@@ -18,12 +18,17 @@ namespace PeerJsServer
 
         public static Message Error(string error)
         {
+            return Create(MessageType.Error, error);
+        }
+
+        public static Message Create(string type, string msg)
+        {
             return new Message
             {
-                Type = MessageType.Error,
+                Type = type,
                 Payload = new
                 {
-                    msg = error,
+                    msg,
                 }
             };
         }

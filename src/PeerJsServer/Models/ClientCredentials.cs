@@ -7,6 +7,8 @@
         string Token { get; }
 
         string Key { get; }
+
+        bool Valid { get; }
     }
 
     public class ClientCredentials : IClientCredentals

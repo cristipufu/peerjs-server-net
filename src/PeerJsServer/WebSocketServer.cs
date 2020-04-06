@@ -10,7 +10,7 @@ namespace PeerJsServer
 {
     public interface IWebSocketServer
     {
-        Task RegisterClientAsync(IClient client, TaskCompletionSource<object> requestCompletedTcs, CancellationToken cancellationToken = default);
+        Task RegisterClientAsync(IClientCredentals credentials, WebSocket socket, TaskCompletionSource<object> requestCompletedTcs, CancellationToken cancellationToken = default);
     }
 
     public class WebSocketServer : IWebSocketServer
@@ -24,16 +24,55 @@ namespace PeerJsServer
             _messageHandler = new MessageHandler(_realm);
         }
 
-        public async Task RegisterClientAsync(IClient client, TaskCompletionSource<object> requestCompletedTcs, CancellationToken cancellationToken = default)
+        public async Task RegisterClientAsync(IClientCredentals credentials, WebSocket socket, TaskCompletionSource<object> requestCompletedTcs, CancellationToken cancellationToken = default)
         {
-            _realm.SetClient(client);
-
-            await client.SendAsync(new Message
+            if (!credentials.Valid)
             {
-                Type = MessageType.Open,
-            }, cancellationToken);
+                await SendMessageAsync(socket, Message.Error(Errors.InvalidWsParameters), cancellationToken);
 
-            await ListenAsync(client, cancellationToken);
+                await CloseSocketAsync(socket, Errors.InvalidWsParameters);
+
+                requestCompletedTcs.TrySetResult(null);
+
+                return;
+            }
+
+            var client = _realm.GetClient(credentials.ClientId);
+
+            if (client != null)
+            {
+                if (credentials.Token != client.GetToken())
+                {
+                    await SendMessageAsync(socket, Message.Create(MessageType.IdTaken, "Id is already used!"));
+
+                    await CloseSocketAsync(socket, Errors.InvalidToken);
+
+                    requestCompletedTcs.TrySetResult(null);
+
+                    return;
+                }
+
+                client.SetSocket(socket);
+
+                // TODO send queued messages
+
+            }
+            else
+            {
+                // TODO check concurrent limit options
+
+                client = new Client(credentials, socket);
+
+                _realm.SetClient(client);
+
+                await client.SendAsync(new Message
+                {
+                    Type = MessageType.Open,
+                }, cancellationToken);
+            }
+
+            // listen for incoming messages
+            await AwaitReceiveAsync(client, cancellationToken);
 
             // clean-up after socket close
             _realm.RemoveClientById(client.GetId());
@@ -41,7 +80,24 @@ namespace PeerJsServer
             requestCompletedTcs.TrySetResult(null);
         }
 
-        private async Task ListenAsync(IClient client, CancellationToken cancellationToken = default)
+        public static Task SendMessageAsync(WebSocket socket, Message msg, CancellationToken cancellationToken = default)
+        {
+            var value = new ArraySegment<byte>(GetSerializedMessage(msg));
+
+            return socket.SendAsync(value, WebSocketMessageType.Text, true, cancellationToken);
+        }
+
+        public static Task CloseSocketAsync(WebSocket socket, string description)
+        {
+            if (socket == null)
+            {
+                return Task.CompletedTask;
+            }
+
+            return socket.CloseAsync(WebSocketCloseStatus.Empty, description, CancellationToken.None);
+        }
+
+        private async Task AwaitReceiveAsync(IClient client, CancellationToken cancellationToken = default)
         {
             var socket = client.GetSocket();
 
@@ -98,6 +154,18 @@ namespace PeerJsServer
             var message = JsonConvert.DeserializeObject<Message>(text);
 
             await _messageHandler.HandleAsync(client, message, cancellationToken);
+        }
+
+        private static byte[] GetSerializedMessage(Message msg)
+        {
+            var serialized = JsonConvert.SerializeObject(msg,
+                Formatting.None,
+                new JsonSerializerSettings
+                {
+                    NullValueHandling = NullValueHandling.Ignore,
+                });
+
+            return Encoding.UTF8.GetBytes(serialized);
         }
     }
 }
