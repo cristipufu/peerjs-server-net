@@ -12,8 +12,11 @@ namespace PeerJs
         private Task _executingTask;
         private readonly CancellationTokenSource _stoppingCts = new CancellationTokenSource();
 
-        public TimedBackgroundTask(TimeSpan interval)
+        protected readonly IServiceProvider Services;
+
+        public TimedBackgroundTask(IServiceProvider services, TimeSpan interval)
         {
+            Services = services;
             _interval = interval;
         }
 

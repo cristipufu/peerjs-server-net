@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,22 +8,33 @@ namespace PeerJs
 {
     public class ZombieConnectionsBackgroundTask : TimedBackgroundTask
     {
-        private readonly IRealm _realm;
         private readonly ILogger<ExpiredMessagesBackgroundTask> _logger;
         private const int DefaultCheckInterval = 300;
 
         public ZombieConnectionsBackgroundTask(
-            IRealm realm,
+            IServiceProvider services,
             ILogger<ExpiredMessagesBackgroundTask> logger)
-            : base(TimeSpan.FromSeconds(DefaultCheckInterval))
+            : base(services, TimeSpan.FromSeconds(DefaultCheckInterval))
         {
             _logger = logger;
-            _realm = realm;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            var clientIds = _realm.GetClientIds();
+            using var scope = Services.CreateScope();
+            var server = scope.ServiceProvider.GetRequiredService<IPeerJsServer>();
+
+            var realms = server.GetRealms();
+
+            foreach (var realm in realms)
+            {
+                await PruneZombieConnectionsAsync(realm.Value);
+            }
+        }
+
+        private async Task PruneZombieConnectionsAsync(IRealm realm)
+        {
+            var clientIds = realm.GetClientIds();
 
             var now = DateTime.UtcNow;
             var aliveTimeout = TimeSpan.FromSeconds(60);
@@ -31,7 +43,7 @@ namespace PeerJs
 
             foreach (var clientId in clientIds)
             {
-                var client = _realm.GetClient(clientId);
+                var client = realm.GetClient(clientId);
                 var timeSinceLastHeartbeat = now - client.GetLastHeartbeat();
 
                 if (timeSinceLastHeartbeat < aliveTimeout)
@@ -47,8 +59,8 @@ namespace PeerJs
                 }
                 finally
                 {
-                    _realm.ClearMessageQueue(clientId);
-                    _realm.RemoveClientById(clientId);
+                    realm.ClearMessageQueue(clientId);
+                    realm.RemoveClientById(clientId);
 
                     socket?.Dispose();
                 }

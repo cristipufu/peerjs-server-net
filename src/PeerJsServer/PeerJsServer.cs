@@ -1,5 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.WebSockets;
 using System.Text;
@@ -10,16 +12,23 @@ namespace PeerJs
 {
     public interface IPeerJsServer
     {
+        IReadOnlyCollection<KeyValuePair<string, IRealm>> GetRealms();
+
         Task RegisterClientAsync(IClientCredentals credentials, WebSocket socket, TaskCompletionSource<object> requestCompletedTcs, CancellationToken cancellationToken = default);
     }
 
     public class PeerJsServer : IPeerJsServer
     {
-        private readonly IRealm _realm;
+        private readonly ConcurrentDictionary<string, IRealm> _world;
 
         public PeerJsServer()
         {
-            _realm = new Realm();
+            _world = new ConcurrentDictionary<string, IRealm>();
+        }
+
+        public IReadOnlyCollection<KeyValuePair<string, IRealm>> GetRealms()
+        {
+            return _world;
         }
 
         public async Task RegisterClientAsync(IClientCredentals credentials, WebSocket socket, TaskCompletionSource<object> requestCompletedTcs, CancellationToken cancellationToken = default)
@@ -35,7 +44,14 @@ namespace PeerJs
                 return;
             }
 
-            var client = _realm.GetClient(credentials.ClientId);
+            if (!_world.TryGetValue(credentials.Key, out var realm))
+            {
+                realm = new Realm();
+
+                _world.TryAdd(credentials.Key, realm);
+            }
+
+            var client = realm.GetClient(credentials.ClientId);
 
             if (client != null)
             {
@@ -61,7 +77,7 @@ namespace PeerJs
 
                 client = new Client(credentials, socket);
 
-                _realm.SetClient(client);
+                realm.SetClient(client);
 
                 await client.SendAsync(new Message
                 {
@@ -70,15 +86,15 @@ namespace PeerJs
             }
 
             // listen for incoming messages
-            await AwaitReceiveAsync(client, cancellationToken);
+            await AwaitReceiveAsync(client, realm, cancellationToken);
 
             // clean-up after socket close
-            _realm.RemoveClientById(client.GetId());
+            realm.RemoveClientById(client.GetId());
 
             requestCompletedTcs.TrySetResult(null);
         }
 
-        private async Task AwaitReceiveAsync(IClient client, CancellationToken cancellationToken = default)
+        private async Task AwaitReceiveAsync(IClient client, IRealm realm, CancellationToken cancellationToken = default)
         {
             var socket = client.GetSocket();
 
@@ -90,7 +106,7 @@ namespace PeerJs
             {
                 var (readResult, message) = await ReadAsync(socket, buffer, cancellationToken);
 
-                await HandleMessageAsync(client, message, cancellationToken);
+                await HandleMessageAsync(client, message, realm, cancellationToken);
 
                 result = readResult;
             }
@@ -125,7 +141,7 @@ namespace PeerJs
             return (result, string.Empty);
         }
 
-        private async Task HandleMessageAsync(IClient client, string text, CancellationToken cancellationToken = default)
+        private async Task HandleMessageAsync(IClient client, string text, IRealm realm, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrEmpty(text))
             {
@@ -134,7 +150,7 @@ namespace PeerJs
 
             var message = JsonConvert.DeserializeObject<Message>(text);
 
-            await _realm.HandleMessageAsync(client, message, cancellationToken);
+            await realm.HandleMessageAsync(client, message, cancellationToken);
         }
     }
 }
