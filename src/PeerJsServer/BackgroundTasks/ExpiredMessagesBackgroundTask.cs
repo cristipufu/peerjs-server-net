@@ -9,18 +9,15 @@ namespace PeerJs
     public class ExpiredMessagesBackgroundTask : TimedBackgroundTask
     {
         private readonly IRealm _realm;
-        private readonly IMessageHandler _messageHandler;
         private readonly ILogger<ExpiredMessagesBackgroundTask> _logger;
 
         public ExpiredMessagesBackgroundTask(
             IRealm realm,
-            IMessageHandler messageHandler,
             ILogger<ExpiredMessagesBackgroundTask> logger)
             : base(TimeSpan.FromSeconds(2))
         {
             _logger = logger;
             _realm = realm;
-            _messageHandler = messageHandler;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -58,7 +55,7 @@ namespace PeerJs
                     {
                         var sourceClient = _realm.GetClient(message.Source);
 
-                        await _messageHandler.HandleAsync(sourceClient, Message.Create(MessageType.Expire, string.Empty), stoppingToken);
+                        await _realm.HandleMessageAsync(sourceClient, Message.Create(MessageType.Expire, string.Empty), stoppingToken);
 
                         seenMap[seenKey] = true;
                     }

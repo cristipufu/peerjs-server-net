@@ -16,12 +16,10 @@ namespace PeerJs
     public class PeerJsServer : IPeerJsServer
     {
         private readonly IRealm _realm;
-        private readonly IMessageHandler _messageHandler;
 
         public PeerJsServer()
         {
             _realm = new Realm();
-            _messageHandler = new MessageHandler(_realm);
         }
 
         public async Task RegisterClientAsync(IClientCredentals credentials, WebSocket socket, TaskCompletionSource<object> requestCompletedTcs, CancellationToken cancellationToken = default)
@@ -136,7 +134,7 @@ namespace PeerJs
 
             var message = JsonConvert.DeserializeObject<Message>(text);
 
-            await _messageHandler.HandleAsync(client, message, cancellationToken);
+            await _realm.HandleMessageAsync(client, message, cancellationToken);
         }
     }
 }
