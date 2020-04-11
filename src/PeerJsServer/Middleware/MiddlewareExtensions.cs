@@ -1,4 +1,4 @@
-﻿using PeerJsServer;
+﻿using PeerJs;
 using System;
 
 namespace Microsoft.AspNetCore.Builder

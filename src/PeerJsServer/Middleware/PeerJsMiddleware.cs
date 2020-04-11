@@ -4,17 +4,17 @@ using System;
 using System.Net.WebSockets;
 using System.Threading.Tasks;
 
-namespace PeerJsServer
+namespace PeerJs
 {
     public class PeerJsMiddleware
     {
         private readonly ILogger<PeerJsMiddleware> _logger;
         private readonly RequestDelegate _next;
-        private readonly IWebSocketServer _webSocketServer;
+        private readonly IPeerJsServer _webSocketServer;
 
         public PeerJsMiddleware(
             RequestDelegate next,
-            IWebSocketServer webSocketServer,
+            IPeerJsServer webSocketServer,
             ILogger<PeerJsMiddleware> logger)
         {
             _next = next;

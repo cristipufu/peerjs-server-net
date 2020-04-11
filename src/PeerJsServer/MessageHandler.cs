@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Net.WebSockets;
 
-namespace PeerJsServer
+namespace PeerJs
 {
     public interface IMessageHandler
     {

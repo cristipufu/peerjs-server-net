@@ -2,7 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 
-namespace PeerJsServer
+namespace PeerJs
 {
     public interface IRealm
     {

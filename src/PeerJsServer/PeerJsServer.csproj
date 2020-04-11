@@ -5,6 +5,7 @@
     <LangVersion>8.0</LangVersion>
     <OutputType>Library</OutputType>
     <Authors>Cristi Pufu</Authors>
+    <RootNamespace>PeerJs</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

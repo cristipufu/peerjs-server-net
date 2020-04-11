@@ -1,4 +1,4 @@
-﻿namespace PeerJsServer
+﻿namespace PeerJs
 {
     public static class Errors
     {

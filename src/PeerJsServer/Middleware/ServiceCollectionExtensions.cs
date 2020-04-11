@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using PeerJsServer;
+using PeerJs;
 
 namespace Microsoft.AspNetCore.Builder
 {
@@ -7,7 +7,7 @@ namespace Microsoft.AspNetCore.Builder
     {
         public static void AddPeerJsServer(this IServiceCollection services)
         {
-            services.AddSingleton<IWebSocketServer, WebSocketServer>();
+            services.AddSingleton<IPeerJsServer, PeerJsServer>();
         }
     }
 }

@@ -6,19 +6,19 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace PeerJsServer
+namespace PeerJs
 {
-    public interface IWebSocketServer
+    public interface IPeerJsServer
     {
         Task RegisterClientAsync(IClientCredentals credentials, WebSocket socket, TaskCompletionSource<object> requestCompletedTcs, CancellationToken cancellationToken = default);
     }
 
-    public class WebSocketServer : IWebSocketServer
+    public class PeerJsServer : IPeerJsServer
     {
         private readonly IRealm _realm;
         private readonly IMessageHandler _messageHandler;
 
-        public WebSocketServer()
+        public PeerJsServer()
         {
             _realm = new Realm();
             _messageHandler = new MessageHandler(_realm);
