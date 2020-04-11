@@ -6,17 +6,17 @@ using System.Threading.Tasks;
 
 namespace PeerJsServer
 {
-    public class MessageExpireBackgroundTask : TimedBackgroundTask
+    public class ExpiredMessagesBackgroundTask : TimedBackgroundTask
     {
         private readonly IRealm _realm;
         private readonly IMessageHandler _messageHandler;
-        private readonly ILogger<MessageExpireBackgroundTask> _logger;
+        private readonly ILogger<ExpiredMessagesBackgroundTask> _logger;
 
-        public MessageExpireBackgroundTask(
+        public ExpiredMessagesBackgroundTask(
             IRealm realm,
             IMessageHandler messageHandler,
-            ILogger<MessageExpireBackgroundTask> logger)
-            : base(TimeSpan.FromSeconds(60))
+            ILogger<ExpiredMessagesBackgroundTask> logger)
+            : base(TimeSpan.FromSeconds(2))
         {
             _logger = logger;
             _realm = realm;
@@ -28,7 +28,7 @@ namespace PeerJsServer
             var clientIds = _realm.GetClientIdsWithQueue();
 
             var now = DateTime.UtcNow;
-            var maxDiff = TimeSpan.FromSeconds(30);
+            var maxDiff = TimeSpan.FromSeconds(10);
 
             var seenMap = new Dictionary<string, bool>();
 
