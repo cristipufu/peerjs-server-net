@@ -76,7 +76,7 @@ namespace PeerJs
                 realm.ClearMessageQueue(clientId);
             }
 
-            _logger.LogInformation($"Pruned expired messages for {seenMap.Keys.Count} peers.");
+            _logger.LogInformation("Pruned expired messages for {} peers.", seenMap.Keys.Count);
         }
     }
 }

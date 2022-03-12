@@ -11,8 +11,8 @@ let randomId = Math.random().toString(36).substring(3);
 
 const peer = new Peer(randomId, {
     host: 'localhost',
-    port: 44329,
-    //host: 'peerjsserverdemo20200405055319.azurewebsites.net',
+    port: 5001,
+    //host: 'myurlazurewebsites.net',
     //port: 443,
     path: '/'
 });

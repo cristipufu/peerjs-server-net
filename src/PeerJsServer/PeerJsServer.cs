@@ -141,7 +141,7 @@ namespace PeerJs
             return (result, string.Empty);
         }
 
-        private async Task HandleMessageAsync(IClient client, string text, IRealm realm, CancellationToken cancellationToken = default)
+        private static async Task HandleMessageAsync(IClient client, string text, IRealm realm, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrEmpty(text))
             {

@@ -68,7 +68,7 @@ namespace PeerJs
                 count++;
             }
 
-            _logger.LogInformation($"Pruned zombie connections for {count} peers.");
+            _logger.LogInformation("Pruned zombie connections for {} peers.", count);
         }
     }
 }

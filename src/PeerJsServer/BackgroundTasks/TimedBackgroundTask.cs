@@ -8,7 +8,7 @@ namespace PeerJs
     public abstract class TimedBackgroundTask : IHostedService, IDisposable
     {
         private Timer _timer;
-        private TimeSpan _interval;
+        private readonly TimeSpan _interval;
         private Task _executingTask;
         private readonly CancellationTokenSource _stoppingCts = new CancellationTokenSource();
 

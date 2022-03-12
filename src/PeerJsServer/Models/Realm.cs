@@ -109,7 +109,7 @@ namespace PeerJs
             };
         }
 
-        private Task AcceptAsync(IClient client, CancellationToken cancellationToken = default)
+        private static Task AcceptAsync(IClient client, CancellationToken cancellationToken = default)
         {
             return client.SendAsync(new Message
             {
@@ -117,7 +117,7 @@ namespace PeerJs
             }, cancellationToken);
         }
 
-        private Task HeartbeatAsync(IClient client)
+        private static Task HeartbeatAsync(IClient client)
         {
             client.SetLastHeartbeat(DateTime.UtcNow);
 
