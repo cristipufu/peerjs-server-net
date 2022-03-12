@@ -105,6 +105,7 @@ namespace PeerJs
                 MessageType.Candidate => TransferAsync(client, message, cancellationToken),
                 MessageType.Expire => TransferAsync(client, message, cancellationToken),
                 MessageType.Leave => LeaveAsync(client, message, cancellationToken),
+                MessageType.IsAvailable => SendAvailableAsync(client, message, cancellationToken),
                 _ => throw new NotImplementedException(),
             };
         }
@@ -122,6 +123,20 @@ namespace PeerJs
             client.SetLastHeartbeat(DateTime.UtcNow);
 
             return Task.CompletedTask;
+        }
+
+        private Task SendAvailableAsync(IClient client, Message message, CancellationToken cancellationToken = default)
+        {
+            var destinationClient = GetClient(message.Destination);
+
+            return client.SendAsync(new Message
+            {
+                Type = MessageType.IsAvailable,
+                Payload = new
+                {
+                    isAvailable = destinationClient != null
+                }
+            }, cancellationToken);
         }
 
         private async Task TransferAsync(IClient client, Message message, CancellationToken cancellationToken = default)

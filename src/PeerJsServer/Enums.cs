@@ -20,7 +20,8 @@
         public const string InvalidKey = "INVALID-KEY"; // The given API key cannot be found.
         public const string Leave = "LEAVE"; // Another peer has closed its connection to this peer.
         public const string Expire = "EXPIRE"; // The offer sent to a peer has expired without response.
-    
+        public const string IsAvailable = "IS_AVAILABLE"; // Request the availability for a specified peer
+
         public static bool ShouldQueue(this Message message)
         {
             return message.Type != Leave && message.Type != Expire && !string.IsNullOrEmpty(message.Destination);
