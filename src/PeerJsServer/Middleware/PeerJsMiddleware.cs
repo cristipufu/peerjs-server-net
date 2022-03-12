@@ -57,7 +57,7 @@ namespace PeerJs
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, ex.Message);
+                _logger.LogError(ex, "{}", ex.Message);
 
                 await socket.CloseAsync(ex.Message);
             }

@@ -57,7 +57,7 @@ namespace PeerJs
             {
                 if (credentials.Token != client.GetToken())
                 {
-                    await socket.SendMessageAsync(Message.Create(MessageType.IdTaken, "Id is already used!"));
+                    await socket.SendMessageAsync(Message.Create(MessageType.IdTaken, "Id is already used!"), cancellationToken);
 
                     await socket.CloseAsync(Errors.InvalidToken);
 
@@ -94,7 +94,7 @@ namespace PeerJs
             requestCompletedTcs.TrySetResult(null);
         }
 
-        private async Task AwaitReceiveAsync(IClient client, IRealm realm, CancellationToken cancellationToken = default)
+        private static async Task AwaitReceiveAsync(IClient client, IRealm realm, CancellationToken cancellationToken = default)
         {
             var socket = client.GetSocket();
 
@@ -115,7 +115,7 @@ namespace PeerJs
             await socket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, cancellationToken);
         }
 
-        private async Task<(WebSocketReceiveResult, string)> ReadAsync(WebSocket socket, ArraySegment<byte> buffer, CancellationToken cancellationToken = default)
+        private static async Task<(WebSocketReceiveResult, string)> ReadAsync(WebSocket socket, ArraySegment<byte> buffer, CancellationToken cancellationToken = default)
         {
             WebSocketReceiveResult result;
 

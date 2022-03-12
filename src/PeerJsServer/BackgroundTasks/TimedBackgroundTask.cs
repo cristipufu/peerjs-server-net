@@ -68,8 +68,17 @@ namespace PeerJs
 
         public void Dispose()
         {
-            _stoppingCts.Cancel();
-            _timer?.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _stoppingCts.Cancel();
+                _timer?.Dispose();
+            }
         }
     }
 }
